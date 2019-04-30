@@ -1,8 +1,7 @@
-    package pack;
+package pack;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import pack.http.XmlParserServlet;
 
@@ -11,8 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-
-import org.eclipse.jetty.server.*;
 
 import javax.xml.bind.JAXBException;
 
@@ -96,12 +93,12 @@ public class Bootstrap {
 
         server.setHandler(context);
 
-
         try {
             server.start();
             server.join();
         } catch (Throwable t) {
             t.printStackTrace(System.err);
         }
+
     }
 }

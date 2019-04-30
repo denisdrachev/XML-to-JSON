@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.PropertyConfigurator;
 import pack.jaxb.Envelope;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -62,13 +64,9 @@ public class XmlParserServlet extends HttpServlet {
         out.write("<!doctype html>\n" +
                 "<html lang=\"en\">\n" +
                 "  <head>\n" +
-                "    <!-- Required meta tags -->\n" +
                 "    <meta charset=\"utf-8\">\n" +
                 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n" +
-                "\n" +
-                "    <!-- Bootstrap CSS -->\n" +
                 "    <link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css\" integrity=\"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T\" crossorigin=\"anonymous\">\n" +
-                "\n" +
                 "    <title>XML to JSON</title>\n" +
                 "  </head> <body> <div class=\"container\" style=\"padding-top: 50px;\">");
         out.write("<script src='https://code.jquery.com/jquery-latest.min.js'></script>");
@@ -84,18 +82,11 @@ public class XmlParserServlet extends HttpServlet {
                 "</button>");
         out.write(" </form></div>");
         out.write("<div class=\"container\" style=\"margin-top: 16px;\">");
-//        out.write("<div style=\"display: none;\" class=\"alert alert-success xml-success\" role=\"alert\">\n" +
-//                "</div>");
-        out.write("<div style=\"display: none;\" class=\"alert alert-success json-success\" role=\"alert\">\n" +
-                "</div>");
-        out.write("<div style=\"display: none;\" class=\"alert alert-success send-success\" role=\"alert\">\n" +
-                "</div>");
-        out.write("<div style=\"display: none;\" class=\"alert alert-danger xml-error\" role=\"alert\">\n" +
-                "</div>");
-        out.write("<div style=\"display: none;\" class=\"alert alert-danger json-error\" role=\"alert\">\n" +
-                "</div>");
-        out.write("<div style=\"display: none;\" class=\"alert alert-danger send-error\" role=\"alert\">\n" +
-                "</div>");
+        out.write("<div style=\"display: none;\" class=\"alert alert-success json-success\" role=\"alert\"></div>");
+        out.write("<div style=\"display: none;\" class=\"alert alert-success send-success\" role=\"alert\"></div>");
+        out.write("<div style=\"display: none;\" class=\"alert alert-danger xml-error\" role=\"alert\"></div>");
+        out.write("<div style=\"display: none;\" class=\"alert alert-danger json-error\" role=\"alert\"></div>");
+        out.write("<div style=\"display: none;\" class=\"alert alert-danger send-error\" role=\"alert\"></div>");
         out.write("</div>");
         out.write("</body><script>" +
                 "$( \"#target\" ).submit(function( event ) {\n" +
@@ -143,23 +134,20 @@ public class XmlParserServlet extends HttpServlet {
                 "</script>" +
                 "\n" +
                 "</html>");
-
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter out = resp.getWriter();
+        PropertyConfigurator.configure("src/log4j.properties");
 
-        BasicConfigurator.configure();
-        Envelope person = null;
 
         try {
-
             JAXBContext jaxbContext = JAXBContext.newInstance(Envelope.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
             StringReader reader = new StringReader(req.getParameter("param1"));
-            person = (Envelope) unmarshaller.unmarshal(reader);
+            Envelope person = (Envelope) unmarshaller.unmarshal(reader);
             out.write("{\"xml\": { \"error\": 0, \"msg\":\"XML parsing success!\"}");
 
             ObjectMapper mapper = new ObjectMapper();
@@ -167,7 +155,6 @@ public class XmlParserServlet extends HttpServlet {
             String json = mapper.writeValueAsString(person);
             out.write(",\"json\": { \"error\": 0, \"msg\":\"JSON parsing success!\"}");
             logger.info(json);
-            logger.info(this);
 
             out.write(sendToAddrPort(json));
 
@@ -182,14 +169,12 @@ public class XmlParserServlet extends HttpServlet {
             out.write("{\"json\": { \"error\": 1, \"msg\":\"JSON convert error!\"}");
 
         } finally {
-            person = null;
             out.write("}");
         }
     }
 
     public String sendToAddrPort(String data) {
 
-        Socket socket = null;
         StringBuffer sb = new StringBuffer(",\"send\":{ \"error\":");
 
         try {
@@ -206,19 +191,17 @@ public class XmlParserServlet extends HttpServlet {
             logger.info(DatatypeConverter.printHexBinary(buf.array()));
 
 
-            socket = new Socket(this.getDestAddr(), this.getDestPort());
+            Socket socket = new Socket(this.getDestAddr(), this.getDestPort());
             OutputStream output = socket.getOutputStream();
             output.write(buf.array());
             sb.append("0, \"msg\" : \"Send package success!\"}");
         } catch (Exception e) {
             sb.append("1, \"msg\" : \"Send package error!\"}");
-            logger.info("Send package error!");
+            logger.error("Send package error!");
         } finally {
             return sb.toString();
         }
     }
-
-
 }
 
 
