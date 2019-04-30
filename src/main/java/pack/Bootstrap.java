@@ -1,4 +1,4 @@
-    package pack;
+package pack;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -10,8 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-
-import org.eclipse.jetty.server.*;
 
 import javax.xml.bind.JAXBException;
 
@@ -87,26 +85,13 @@ public class Bootstrap {
         Bootstrap el = new Bootstrap();
 
         Server server = new Server(Integer.valueOf(el.getHttpPort()));
-//
-//        ServletHandler handler = new ServletHandler();
-//
-//        handler.addServletWithMapping(XmlParserServlet.class, "/");
-//        server.setHandler(handler);
-
-
         ServletContextHandler context = new ServletContextHandler();
-//        context.setContextPath("/");
 
         XmlParserServlet xmlParserServlet = new XmlParserServlet(el.getDestAddr(), el.getDestPort());
         ServletHolder servletHolder = new ServletHolder(xmlParserServlet);
         context.addServlet(servletHolder, "");
 
-        // Option 2: Using ServletContext attribute
-//        context.setAttribute("my.greeting", "you");
-//        context.addServlet(GreetingServlet.class, "/greetings/*");
-
         server.setHandler(context);
-
 
         try {
             server.start();

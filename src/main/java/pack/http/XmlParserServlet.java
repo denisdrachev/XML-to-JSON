@@ -1,42 +1,27 @@
 package pack.http;
 
-//import jdk.internal.org.xml.sax.InputSource;
-//import org.eclipse.jetty.server.handler.DefaultHandler;
-//import org.w3c.dom.Document;
-//import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.log4j.BasicConfigurator;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 import pack.jaxb.Envelope;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-        import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.validation.Schema;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 import org.apache.log4j.Logger;
 
-//@WebServlet(name = "XmlParserServlet", urlPatterns = "/123")
-//@WebServlet("/s2")
 public class XmlParserServlet extends HttpServlet {
 
-//    Logger logger = Logger.getLogger(Envelope.class);
     static Logger logger = Logger.getLogger(Envelope.class);
 
     private String destAddr;
@@ -73,10 +58,6 @@ public class XmlParserServlet extends HttpServlet {
 
         resp.setContentType("text/html");
         PrintWriter out = resp.getWriter();
-
-
-//        RequestDispatcher view = req.getRequestDispatcher("templates/index.html");
-//        view.forward(req, resp);
 
         out.write("<!doctype html>\n" +
                 "<html lang=\"en\">\n" +
@@ -179,27 +160,16 @@ public class XmlParserServlet extends HttpServlet {
 
             StringReader reader = new StringReader(req.getParameter("param1"));
             person = (Envelope) unmarshaller.unmarshal(reader);
-//            out.write("XML parsing completed successfully</br>");
             out.write("{\"xml\": { \"error\": 0, \"msg\":\"XML parsing success!\"}");
-
-//            System.out.println("PERSON: " + person.toString());
-//            out.write("PERSON: " + person.toString() + "\n\n");
-//            System.out.println(person.toString());
-
-
-//            XmlMapper xmlMapper = new XmlMapper();
-//            String xml = xmlMapper.writeValueAsString(person);
-//            out.write("\n\n" + xml);
-//            System.out.println(xml);
-
 
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
             String json = mapper.writeValueAsString(person);
             out.write(",\"json\": { \"error\": 0, \"msg\":\"JSON parsing success!\"}");
             logger.info(json);
+            logger.info(this);
 
-            out.write(sendToPort(json));
+            out.write(sendToAddrPort(json));
 
         } catch (JAXBException je) {
 
@@ -214,13 +184,10 @@ public class XmlParserServlet extends HttpServlet {
         } finally {
             person = null;
             out.write("}");
-
         }
-
-
     }
 
-    public String sendToPort(String data) throws IOException {
+    public String sendToAddrPort(String data) throws IOException {
 
         Socket socket = null;
         StringBuffer sb = new StringBuffer(",\"send\":{ \"error\":");
