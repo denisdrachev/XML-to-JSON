@@ -54,7 +54,7 @@ public class XmlParserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
         resp.setContentType("text/html");
         PrintWriter out = resp.getWriter();
@@ -147,7 +147,7 @@ public class XmlParserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PrintWriter out = resp.getWriter();
 
         BasicConfigurator.configure();
@@ -187,7 +187,7 @@ public class XmlParserServlet extends HttpServlet {
         }
     }
 
-    public String sendToAddrPort(String data) throws IOException {
+    public String sendToAddrPort(String data) {
 
         Socket socket = null;
         StringBuffer sb = new StringBuffer(",\"send\":{ \"error\":");
