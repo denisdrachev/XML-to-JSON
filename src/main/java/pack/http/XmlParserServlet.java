@@ -203,12 +203,12 @@ public class XmlParserServlet extends HttpServlet {
 
         } catch (JAXBException je) {
 
-            logger.error("Unmarshalling error", je);
+            logger.error("XML parsing error!");
             out.write("{\"xml\": { \"error\": 1, \"msg\": \"XML parsing error!\"}");
 
         } catch (JsonMappingException jme)
         {
-            logger.error("Error convert to json", jme);
+            logger.error("JSON convert error!");
             out.write("{\"json\": { \"error\": 1, \"msg\":\"JSON convert error!\"}");
 
         } finally {
@@ -218,25 +218,6 @@ public class XmlParserServlet extends HttpServlet {
         }
 
 
-    }
-
-    public boolean validate(final Schema schema, final String xml){
-        try {
-//            doValidate(xml);
-            XMLReader parser = XMLReaderFactory.createXMLReader();
-            parser.setContentHandler(new DefaultHandler());
-            InputSource source = new InputSource(new ByteArrayInputStream(xml.getBytes()));
-            parser.parse(source);
-            return true;
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (org.xml.sax.SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public String sendToPort(String data) throws IOException {
@@ -264,7 +245,7 @@ public class XmlParserServlet extends HttpServlet {
             sb.append("0, \"msg\" : \"Send package success!\"}");
         } catch (Exception e) {
             sb.append("1, \"msg\" : \"Send package error!\"}");
-            logger.info("Error sending bytes!");
+            logger.info("Send package error!");
         } finally {
             return sb.toString();
         }
